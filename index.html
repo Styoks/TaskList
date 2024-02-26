@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To do list</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />  
+</head>
+<body>
+    
+        <div id="container" class="not-blurry">
+            <ul id="menu">
+                <li>
+                    <span id="home">Home</span>
+                </li>
+                <li>
+                    <span id="today">Today</span>
+                </li>
+                <li>
+                    <span id="week">WeekAhead</span>
+                </li>
+                <li>
+                    <ul id="projects">Projects
+                        <li>Otracsa</li>
+                        <li>Otracsa</li>
+                        <li>Otracsa</li>
+                    </ul>
+                </li>
+                <li>
+                    <span id="notes">Notes</span>
+                </li>
+                <button id="addNewTask">+</button>
+            </ul>
+            <ul id="home_content">
+            </ul>
+            <ul id="content">
+            </ul>
+        </div>
+        <div id="form-div" class="hidden form">
+            <form id="form" action="/" >
+                <div>
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title">
+                </div>
+                <div>
+                    <label for="description">Description</label>
+                    <input type="text" id="description" name="description">
+                </div>
+                <div>
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date">
+                </div>
+                
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="edit-div hidden absolute">
+            <textarea name="title" id="edited-title" cols="30" rows="10"></textarea>
+            <textarea name="desc" id="edited-desc" cols="30" rows="10"></textarea>
+            <button id="send-edit">send</button>
+        </div>
+        <div class="descriptions hidden">
+            <h1>asdasd</h1>
+            <p>asdasd</p>
+        </div>
+
+    <script src="./index.js"></script>
+</body>
+</html>
