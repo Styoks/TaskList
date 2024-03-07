@@ -1,6 +1,6 @@
 const addNewTaskButton = document.getElementById("addNewTask")
 const home_content = document.querySelector("#home_content") //rename to taskContent
-//add taskMenu
+const taskMenu = document.querySelector("#menu")
 const taskForm = document.querySelector("#form-div") //check if these two forms can be only one
 const form = document.querySelector("#form")
 
@@ -12,61 +12,75 @@ const homeButton = document.querySelector("#home")
 const todayButton = document.querySelector("#today")
 const weekAheadButton = document.querySelector("#week")
 
+let taskArray = []
+
+//localStorage.setItem("tasks", JSON.stringify(arrayParsed))
+const localStorageTasks = localStorage.getItem("tasks")
+if (localStorageTasks != null ) {
+    taskArray = JSON.parse(localStorageTasks)
+}
+
+//TODO Uncomment if wanting to overwrite local storage tasks with default ones
+//const taskArray = []
+
 addNewTaskButton.addEventListener("pointerdown", (e) => {
     setVisible(true, taskForm)
     setBlurElement(true)
 })
 
+function saveTasksToLocalStorage () {
+    localStorage.setItem("tasks", JSON.stringify(taskArray))
+}
+
 form.addEventListener("submit", (e)=>{
+    
     const title = document.querySelector("#title").value
     const description = document.querySelector("#description").value
     const date = document.querySelector("#date").value
-    const task = createNewTaskAndPushArray(title, description, date)
+    const identificator = Date.now()
+    const task = createNewTaskAndPushArray(title, description, date, identificator, false)
     renderTasks(task)
     setVisible(false, taskForm)
     setBlurElement(false)
     e.preventDefault()
 })
 
-function createNewTaskAndPushArray (title, description, date) {
-    let task = new TaskConstructor (title, description, date)
+function createNewTaskAndPushArray (title, description, date, uniqueId, isChecked ) {
+    let task = new TaskConstructor (title, description, date, uniqueId, isChecked)
     taskArray.push(task)
+    saveTasksToLocalStorage ()
     return taskArray;
 }
-
+let idIndex = 0
 function createCheckBox () {
     let createDiv = document.createElement("div")
     let newCheckBox = document.createElement("input")
     let newLabel = document.createElement("label")
     createDiv.id = "inputCheckout"
     newCheckBox.type = "checkbox"
-    newCheckBox.id = "checkboxx"
+    newCheckBox.id = `checkbox${idIndex}`
     newCheckBox.classList.add("css-checkbox")
-    newLabel.htmlFor = "checkboxx"
+    newLabel.htmlFor = `checkbox${idIndex}`
     newCheckBox.label = ""
     newLabel.addEventListener("pointerdown", (e)=>{
         onCheckboxPointerDown(e)
     })
     createDiv.appendChild(newCheckBox)
     createDiv.appendChild(newLabel)
+    idIndex+=1
     
     return createDiv    
 }
 
-const taskArray = [
-    { title: "Cleaning day!", description: "Clean the bathroom", date: "2024-03-19" },
-    { title: "Walking", description: "Minimum 10 min!", date: "2024-02-22" },
-    { title: "Pick the groceries", description: "Or not.... zzz", date: "2024-02-29" }
-
-]
-
-
 function renderTasks (array) {
     home_content.innerHTML= ""
+    home_content.classList.add("tasks")
+    home_content.classList.remove("notes")
     array.forEach(element => {
         const newEle = document.createElement("li")
         const title = document.createElement("span")
         const desc = document.createElement("p")
+        title.id = element.uniqueId
         desc.innerHTML = element.description
         desc.classList.add("hidden")
         desc.classList.add("absolute")
@@ -79,27 +93,27 @@ function renderTasks (array) {
         const date = document.createElement("li")
         const eraseButton = createEraseButton(newEle)
         const editButton = createEditButton(newEle)
-        // newEle.addEventListener("pointerdown", (e)=>{
-        //     if (e.target != checkbox && e.target != eraseButton && e.target != editButton){
-        //         const title = e.target.parentNode.querySelector("span").innerHTML
-        //         const desc = e.target.parentNode.querySelector("p").innerHTML
-        //         seeDescription(title, desc)
-        //         setVisible(true, descriptions)
-        //         setBlurElement(true)
-        //         // let a = newEle.getElementsByTagName("div")
-        //         // setVisible(true, a[0])
-        //     }
+        newEle.addEventListener("pointerdown", (e)=>{
+            if (e.target != checkbox && e.target != eraseButton && e.target != editButton){
+                const title = e.target.parentNode.querySelector("span").innerHTML
+                const desc = e.target.parentNode.querySelector("p").innerHTML
+                seeDescription(title, desc)
+                setVisible(true, descriptions)
+                setBlurElement(true)
+                // let a = newEle.getElementsByTagName("div")
+                // setVisible(true, a[0])
+            }
             
-        // })
+        })
     });
 }
 
 function createEditButton (newEle){
     const editButton = document.createElement("button")
     editButton.innerHTML = "Edit"
-    editButton.id = "edit"
-    editButton.addEventListener("pointerdown", (newEle)=>{
-        editForm(newEle)
+    editButton.classList.add("edit")
+    editButton.addEventListener("pointerdown", (e)=>{
+        editForm(e)
         setVisible(true, edit)
         setBlurElement(true)
     })
@@ -108,23 +122,31 @@ function createEditButton (newEle){
 }
 
 function editForm (e){
+    let task = taskArray[findIndexfromArray(e)]
+    console.log(task)
     const editedTitle = document.querySelector("#edited-title")
     const editedDesc = document.querySelector("#edited-desc")
     const editedButton = document.querySelector("#send-edit")
-    editedTitle.value = e.target.parentNode.querySelector("span").innerHTML
-    editedDesc.value = e.target.parentNode.querySelector("p").innerHTML
-    editedButton.addEventListener("pointerdown", ()=> {
-        e.target.parentNode.querySelector("span").innerHTML = editedTitle.value
-        e.target.parentNode.querySelector("p").innerHTML = editedDesc.value
+    editedTitle.value = task.title
+    editedDesc.value = task.description
+    function forListener() {
+        task.title = editedTitle.value
+        task.description = editedDesc.value
+        saveTasksToLocalStorage ()
+        renderTasks(taskArray)
         setVisible(false, edit)
         setBlurElement(false)
-    })
+        editedButton.removeEventListener("pointerdown", forListener)
+    }
+    
+    editedButton.addEventListener("pointerdown", forListener
+    )
 }
 
 function createEraseButton (newEle) {
     const erase = document.createElement("button")
     erase.innerHTML = "Borrar"
-    erase.id = "erase"
+    erase.classList.add("erase")
     erase.addEventListener("pointerdown", (e)=>{
         // home_content.removeChild(e.target.parentNode)
         eraseFormList(e)
@@ -134,21 +156,28 @@ function createEraseButton (newEle) {
 }
 
 function eraseFormList (e) {
-    let title = e.target.parentNode.querySelector("span").innerHTML
-    let desc = e.target.parentNode.querySelector("p").innerHTML
-    const sameTitle = (element) => element.title == title && element.description == desc
-    let index = taskArray.findIndex(sameTitle)
-    taskArray.splice(index, 1)
+    let ee = findIndexfromArray (e)
+    taskArray.splice(ee, 1)
+    saveTasksToLocalStorage ()
     renderTasks(taskArray)
 }
 
+function findIndexfromArray (e) {
+    let identificator = e.target.parentNode.querySelector("span").id
+    const sameTitle = (element) => element.uniqueId == identificator
+    let index = taskArray.findIndex(sameTitle)
+    return index
+
+}
+
 function onCheckboxPointerDown (e) {
-    console.log(e)
-    strikethrough(e.target.checked, e)
+    let checkboxChecked = document.querySelector(`#${e.target.htmlFor}`)
+    strikethrough(checkboxChecked.checked, e)
 }
 
 function strikethrough (boolean, b) {
-    let parentDiv = b.target.parentNode.querySelector("span");
+    console.log(b)
+    let parentDiv = b.querySelector("span");
     if (boolean){
         parentDiv.style.textDecoration = "none" 
     } else {
@@ -158,25 +187,37 @@ function strikethrough (boolean, b) {
  }
 
 class TaskConstructor {
-    constructor (title, description, date){
+    constructor (title, description, date, uniqueId, isChecked){
         this.title = title;
         this.description = description;
         this.date = date
+        this.uniqueId = uniqueId
+        this.isChecked = isChecked
     }
 }
 
 function seeDescription (title, desc){
+    console.log("Entraque")
+    setVisible(true, descriptions)
     descriptions.querySelector("h1").innerHTML = title
     descriptions.querySelector("p").innerHTML = desc
-    window.addEventListener("pointerdown", (e)=>{
-        if (e.target != descriptions){
-            console.log("Adios")
+    function clickOutside (e) {
+        if (e.target !== descriptions && !descriptions.contains(e.target)){
             setBlurElement(false)
             setVisible(false, descriptions)
+           
         } else {
-            console.log("HOLA")
-        }
-    })
+            console.log("nova")
+        } 
+        window.removeEventListener("pointerdown", clickOutside)
+    }
+    setTimeout(()=> {
+        console.log("Entraque2")
+        window.addEventListener("pointerdown", (e)=>{
+            clickOutside(e)
+        })
+     }
+     ,200)
 }
 
 function setVisible (boolean, item) {
@@ -219,16 +260,37 @@ function renderToday() {
 
 function daysAhead(taskDay, daysAhead) {
     let fecha = new Date(taskDay)
-    let today = new Date()
-    for (var i = 0; i < daysAhead; i++){
-        
-        if(today.getFullYear() == fecha.getFullYear() && 
-        today.getMonth() == fecha.getMonth() && 
-        today.getDate() == fecha.getDate())
-        {
-            return true
-        } else {
-            today.setDate(today.getDate() + 1)
-        }
-    }
+    let today = new Date(new Date().toDateString())
+    let weekLaterDate = new Date(new Date().toDateString())
+    weekLaterDate.setDate(today.getDate() + daysAhead)
+    return fecha >= today && fecha <= weekLaterDate
 }
+const notesArray = [
+    {title: "Hola", description:"Como estas?"},
+    {title: "Hello", description:"Me llamo Paco Romulano"},
+    {title: "Hello", description:"How are you?"},
+    {title: "Hello", description:"How are you?"},
+    {title: "Hello", description:"How are you?"},
+    {title: "Hello", description:"How are you?"},
+    {title: "Hello", description:"How are you?"},
+    {title: "Hello", description:"How are you?"},
+]
+function renderNotes() {
+    home_content.innerHTML= ""
+    home_content.classList.remove("tasks")
+    home_content.classList.add("notes")
+    notesArray.forEach((element)=>{
+        let title = document.createElement("h1")
+        let desc = document.createElement("p")
+        let note = document.createElement("div")
+        title.innerHTML = element.title
+        desc.innerHTML = element.description
+        note.appendChild(title)
+        note.appendChild(desc)
+        home_content.appendChild(note)
+
+    })
+}
+notes.onclick = renderNotes
+
+renderAll()

@@ -3,12 +3,12 @@ html, body {
     font-family: "Roboto";
     font-size: 35px;
 }
-#erase, #edit {
+.erase, .edit {
     border-radius: 10%;
     border-style: none;
     background-color: #656a75;
 }
-#erase {
+.erase {
     margin-left: auto;
 }
 #projects {
@@ -49,7 +49,7 @@ body {
     justify-content: center;
 }
 
-#home_content {
+.tasks {
     width: 66%;
     display: flex;
     flex-direction: column;
@@ -213,4 +213,26 @@ li {
     font-size: 10px; 
     height: 31px; 
     width: 31px; 
+}
+
+.notes {
+    width: 66%;
+    display: flex;
+    padding-left: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.notes > * {
+    display: flex;
+    flex-direction: column;
+    background-color: #5d3e74;
+    width: 150px;
+    height: fit-content;
+    padding: 20px;
+    gap: 10px;
+}
+
+.notes > * > * {
+    margin: 0;
 }
